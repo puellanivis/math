@@ -62,7 +62,7 @@ func (c *composition) Verbose(prec int) string {
 		args = append(args, fmt.Sprintf("%.*v", prec-1, g))
 	}
 
-	return fmt.Sprintf("%.*v(%s)", prec, c.f, strings.Join(args, ", "))
+	return fmt.Sprintf("%.*v(%s)", prec-1, c.f, strings.Join(args, ", "))
 }
 
 func (c *composition) Format(s fmt.State, verb rune) {

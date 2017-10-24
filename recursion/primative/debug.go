@@ -85,6 +85,18 @@ func (f *named) Compose(g ...Func) Func {
 	return Compose(f, g...)
 }
 
+func (f *named) extend(n uint) Func {
+	type extender interface{
+		extend(uint) Func
+	}
+
+	if f, ok := f.Func.(extender); ok {
+		return f.extend(n)
+	}
+
+	return Extend(f.Func, n)
+}
+
 func Debug(f Func) Func {
 	return &funcN{
 		ary: f.Ary(),

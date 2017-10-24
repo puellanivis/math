@@ -21,31 +21,31 @@ var (
 	// Addition(x, y) = x + y
 	Addition = Name("add", Exponentiate(Identity, Increment))
 
-	// reverseSubtraction(x, y) = { 0       if x > y,
+	// ReverseSubtraction(x, y) = { 0       if x > y,
 	//                            { y - x   otherwise,
-	reverseSubtraction = Exponentiate(Identity, Decrement)
+	ReverseSubtraction = Name("nsub", Exponentiate(Identity, Decrement))
 
 	// Subtraction(x, y) = { 0       if y > x,
 	//                     { x - y   otherwise,
 	// NB: Since iteration is done upon the first parameter, we need swap/reverse the arguments.
-	Subtraction = Name("sub", Reverse(Exponentiate(Identity, Decrement)))
+	Subtraction = Name("sub", Reverse(ReverseSubtraction))
 
 	// Difference(x, y) = |y - x|
 	//                  = Addition(Subtraction(x, y), Subtraction(y, x))
-	Difference = Name("diff", Addition.Compose(Subtraction, reverseSubtraction))
+	Difference = Name("diff", Addition.Compose(Subtraction, ReverseSubtraction))
 
 	// Multiplication(x, y) = x * y
 	Multiplication = Name("mul", Exponentiate(Zero, Addition))
 
 	// Power(x, y) = y ^ x
-	Power = Name("pow", Exponentiate(SuccessorOf(Zero), Multiplication))
+	Power = Name("pow", Exponentiate(Constant(1), Multiplication))
 
 	// Factorial(x) = x!
 	Factorial = Name("fact", ProductSeries(SuccessorOf(Identity)))
 
 	Sign = Name("sgn", Recurse(Zero, Extend(Constant(1), 2)))
 
-	IsZero = Name("z?", Recurse(Constant(1), Extend(Zero, 2)))
+	IsZero = Name("isz", Recurse(Constant(1), Extend(Zero, 2)))
 	IsNotZero = Sign
 
 	IsEqual = IsZero.Compose(Difference)
@@ -54,8 +54,8 @@ var (
 	IsLessThanOrEqual = IsZero.Compose(Subtraction)
 	IsGreaterThan = IsZero.Compose(Subtraction)
 
-	IsLessThan = IsNotZero.Compose(reverseSubtraction)
-	IsGreaterThanOrEqual = IsZero.Compose(reverseSubtraction)
+	IsLessThan = IsNotZero.Compose(ReverseSubtraction)
+	IsGreaterThanOrEqual = IsZero.Compose(ReverseSubtraction)
 
 	LogicalNot = Name("not", IsZero)
 	LogicalValue = IsNotZero

@@ -41,7 +41,7 @@ func (c constant) Compose(g ...Func) Func {
 }
 
 func (c constant) extend(n uint) Func {
-	return Name(fmt.Sprintf("C%s%s", superscript.Transform(n), subscript.Transform(c)), &extendedConst{
+	return Name(fmt.Sprintf("C%s%s", superscript.Transform(n), subscript.Transform(uint(c))), &extendedConst{
 		n: n,
 		c: c,
 	})
@@ -67,13 +67,13 @@ func (c *extendedConst) Ary() uint {
 // String returns the extended constant as a form of successive recursions selecting the first value,
 // with the end-base-case as the successor construction of the constant.
 func (c *extendedConst) String() string {
-	var list []string
+	s := c.c.String()
 
-	for i := uint(0); i < c.n; i++ {
-		list = append(list, fmt.Sprintf(", P%s₁)", superscript.Transform(i+2)))
+	if c.n == 1 {
+		return fmt.Sprintf("R(%s, P²₁)", s)
 	}
 
-	return fmt.Sprintf("%s%s%s", strings.Repeat("R(", int(c.n)), c.c.String(), strings.Join(list, ""))
+	return fmt.Sprintf("R(%s, P²₁)(P%s₁)", s, superscript.Transform(c.n))
 }
 
 func (c *extendedConst) Format(s fmt.State, verb rune) {
@@ -85,7 +85,7 @@ func (c *extendedConst) Compose(g ...Func) Func {
 }
 
 func (c *extendedConst) extend(n uint) Func {
-	return Name(fmt.Sprintf("C%s%s", superscript.Transform(n), subscript.Transform(c.c)), &extendedConst{
+	return Name(fmt.Sprintf("C%s%s", superscript.Transform(n), subscript.Transform(uint(c.c))), &extendedConst{
 		n: n,
 		c: c.c,
 	})

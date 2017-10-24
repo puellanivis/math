@@ -1,7 +1,11 @@
 package primative
 
 import (
+	"fmt"
+	"sort"
 	"testing"
+
+	"github.com/puellanivis/breton/lib/display/tables"
 )
 
 func TestBasics(t *testing.T) {
@@ -268,4 +272,57 @@ func TestSubtraction(t *testing.T) {
 	if k := diff.Apply(42, 12); k != 30 {
 		t.Errorf("%.1v(42, 12): expected 30, got %d", diff, k)
 	}
+}
+
+func TestPrinting(t *testing.T) {
+	return
+	funcs := map[string]Func{
+		"Identity": Identity,
+		"Increment": Increment,
+		"Decrement": Decrement,
+		"Addition": Addition,
+		"ReverseSubtraction": ReverseSubtraction,
+		"Subtraction": Subtraction,
+		"Difference": Difference,
+		"Multiplication": Multiplication,
+		"Power": Power,
+		"Factorial": Factorial,
+		"Sign": Sign,
+		"IsZero": IsZero,
+		"IsNotZero": IsNotZero,
+		"IsEqual": IsEqual,
+		"IsNotEqual": IsNotEqual,
+		"IsLessThanOrEqual": IsLessThanOrEqual,
+		"IsGreaterThan": IsGreaterThan,
+		"IsLessThan": IsLessThan,
+		"IsGreaterThanOrEqual": IsGreaterThanOrEqual,
+		"LogicalNot": LogicalNot,
+		"LogicalValue": LogicalValue,
+		"LogicalAnd": LogicalAnd,
+		"LogicalOr": LogicalOr,
+		"LogicalXor": LogicalXor,
+		"Remainder": Remainder,
+		"Quotient": Quotient,
+	}
+
+	var keys []string
+	for key := range funcs {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	var table tables.Table
+
+	for _, key := range keys {
+		f := funcs[key]
+		
+		table = tables.Append(table,
+			key,
+			fmt.Sprintf("ℕ%s→ℕ¹", superscript.Transform(f.Ary())),
+			fmt.Sprintf("%.1v", f),
+		)
+	}
+
+	fmt.Println(table)
 }

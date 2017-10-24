@@ -39,6 +39,18 @@ func endExtend(f Func, n uint) Func {
 		return f
 	}
 
+	if k == 0 {
+		// If we’re extending a 0-ary function, then it doesn’t matter what order we work in.
+		// So, just use the function we’ve already developed.
+		return Extend(f, n)
+	}
+
+	if f, ok := f.(*named); ok {
+		if p, ok := f.Func.(*projection); ok {
+			return endExtend(p, n)
+		}
+	}
+
 	// Special case: extending a projection is as simple as increasing the n of the Projection.
 	// endExtending requires also incrementing the i by the difference of the increase.
 	if p, ok := f.(*projection); ok {
@@ -49,11 +61,12 @@ func endExtend(f Func, n uint) Func {
 		}
 	}
 
-	// such meta, very recursive, wow
-	return Recurse(
-		endExtend(f, n-1),
-		Project(n+1, 1),
-	)
+	args := make([]Func, k)
+	for i := range args {
+		args[i] = Project(n, (n-k) + uint(i)+1)
+	}
+
+	return f.Compose(args...)
 }
 
 // Extend returns an n-ary function that returns the value of the k-ary f function.
@@ -78,14 +91,20 @@ func Extend(f Func, n uint) Func {
 	}
 
 	if k == 0 {
-		// in the case of a 0-ary function, no reordering of parameters is necessary.
-		// the underlying function won’t use any of them anyways.
-		return endExtend(f, n)
+		// We cannot compose a 0-ary function to anything but itself.
+		// However, we can recurse on a single value such that base case is the 0-ary function,
+		// and each recursion returns the results of the last.
+		// At this point, we now have a 1-ary function.
+		// And THAT function, _can_ be composed via projections into an n-ary function.
+		return Extend(Recurse(f, Project(2, 1)), n)
 	}
 
-	// as endExtend trims arguments from the start,
-	// we have to reverse the arguments to start, and then reverse them again before applying f.
-	return Reverse(endExtend(Reverse(f), n))
+	args := make([]Func, k)
+	for i := range args {
+		args[i] = Project(n, uint(i)+1)
+	}
+
+	return f.Compose(args...)
 }
 
 // Reverse returns a k-ary function that composes f upon a reverse of the arguments given.

@@ -24,6 +24,13 @@ func (r *recursion) Apply(x ...uint) uint {
 		return r.f.Apply(x[1:]...)
 	}
 
+	// OPTIMIZATION
+	// if the recursive function is just returning the results of the next recursion,
+	// then we can short-circuit to the chase: they’re all just returning the base case.
+	if p, ok := r.g.(*projection); ok && p.i == 0 {
+		return r.f.Apply(x[1:]...)
+	}
+
 	// build "stack" frame…
 	x_ := make([]uint, len(x)+1)
 
@@ -67,7 +74,7 @@ func (r *recursion) Verbose(prec int) string {
 		return fmt.Sprintf("R(%+v, %+v)", r.f, r.g)
 	}
 
-	return fmt.Sprintf("R(%.*v, %.*v)", prec, r.f, prec, r.g)
+	return fmt.Sprintf("R(%.*v, %.*v)", prec-1, r.f, prec-1, r.g)
 }
 
 func (r *recursion) Format(s fmt.State, verb rune) {
