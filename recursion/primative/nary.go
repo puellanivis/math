@@ -29,3 +29,7 @@ func (f *funcN) Ary() uint {
 func (f *funcN) String() string {
 	return f.s
 }
+
+func (f *funcN) Format(s fmt.State, verb rune) {
+	format(f, s, verb)
+}

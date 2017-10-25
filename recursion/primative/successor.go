@@ -30,6 +30,10 @@ func (s successor) String() string {
 	return "S"
 }
 
+func (S successor) Format(s fmt.State, verb rune) {
+	format(S, s, verb)
+}
+
 var Successor successor
 
 func SuccessorOf(f Func) Func {
