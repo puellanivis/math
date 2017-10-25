@@ -2,7 +2,6 @@ package primative
 
 import (
 	"fmt"
-	"sort"
 	"testing"
 
 	"github.com/puellanivis/breton/lib/display/tables"
@@ -274,9 +273,8 @@ func TestSubtraction(t *testing.T) {
 	}
 }
 
-func TestPrinting(t *testing.T) {
-	return
-	funcs := map[string]Func{
+var (
+	funcNameMap = map[string]Func{
 		"Identity": Identity,
 		"Increment": Increment,
 		"Decrement": Decrement,
@@ -304,25 +302,77 @@ func TestPrinting(t *testing.T) {
 		"Remainder": Remainder,
 		"Quotient": Quotient,
 	}
+)
 
-	var keys []string
-	for key := range funcs {
-		keys = append(keys, key)
-	}
+func TableFuncs(t tables.Table, names []string) tables.Table {
+	for _, key := range names {
+		if key == "---" {
+			t = tables.Append(t)
+			continue
+		}
 
-	sort.Strings(keys)
+		f := funcNameMap[key]
+		prec := 1
+		name := ""
 
-	var table tables.Table
+		if n, ok := f.(*named); !ok {
+			prec--
+		} else {
+			name = n.name
+		}
 
-	for _, key := range keys {
-		f := funcs[key]
-		
-		table = tables.Append(table,
+		t = tables.Append(t,
 			key,
 			fmt.Sprintf("ℕ%s→ℕ¹", superscript.Transform(f.Ary())),
-			fmt.Sprintf("%.1v", f),
+			name,
+			fmt.Sprintf("%.*v", prec, f),
 		)
 	}
+
+	return t
+}
+
+func TestPrinting(t *testing.T) {
+	var table tables.Table
+
+	return // comment to print out a table of function definitions.
+
+	table = TableFuncs(table, []string{
+		"Identity",
+		"Sign",
+		"---",
+		"Increment",
+		"Addition",
+		"Multiplication",
+		"Power",
+		"---",
+		"Factorial",
+		"---",
+		"Decrement",
+		"ReverseSubtraction",
+		"Subtraction",
+		"Difference",
+		"---",
+		"IsZero",
+		"IsNotZero",
+		"---",
+		"LogicalValue",
+		"LogicalNot",
+		"---",
+		"IsEqual",
+		"IsNotEqual",
+		"IsLessThanOrEqual",
+		"IsGreaterThan",
+		"IsGreaterThanOrEqual",
+		"IsLessThan",
+		"---",
+		"LogicalAnd",
+		"LogicalOr",
+		"LogicalXor",
+		"---",
+		"Remainder",
+		"Quotient",
+	})
 
 	fmt.Println(table)
 }
