@@ -107,6 +107,20 @@ func Extend(f Func, n uint) Func {
 	return f.Compose(args...)
 }
 
+// PredicateArgs returns a k-ary function that composes f upon the predicate values of each argument.
+// 	g(x₁, …, x_n) = f( sgn(x₁), …, sgn(x_n) )
+func PredicateArgs(f Func) Func {
+	n := f.Ary()
+
+	args := make([]Func, n)
+
+	for i := range args {
+		args[i] = Sign.Compose(Project(n, uint(i+1)))
+	}
+
+	return f.Compose(args...)
+}
+
 // Reverse returns a k-ary function that composes f upon a reverse of the arguments given.
 // 	g(x₁, …, x_n) = f(x_n, …, x₁)
 func Reverse(f Func) Func {
@@ -181,13 +195,13 @@ func ProductSeries(f Func) Func {
 func Summation(f Func) Func {
 	k := f.Ary()
 
-	return Name(fmt.Sprintf("sum(%s)", f), Recurse(
+	return Recurse(
 		Extend(Zero, k-1),
 		Addition.Compose(
 			Project(k+1, 1),
 			endExtend(f, k+1),
 		),
-	))
+	)
 }
 
 // Count returns a function that sums the signs of a series of applications of a function.
