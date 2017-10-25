@@ -41,44 +41,62 @@ var (
 	Power = Name("pow", Exponentiate(Constant(1), Multiplication))
 
 	// Factorial(x) = x!
-	Factorial = Name("fact", ProductSeries(SuccessorOf(Identity)))
+	Factorial = Name("fact", ProductSeries(Successor))
 
+	// Sign(x) = { 0   if x = 0,
+	//           { 1   otherwise,
 	Sign = Name("sgn", Recurse(Zero, Extend(Constant(1), 2)))
 
+	// IsZero(x) = { 1   if x = 0,
+	//             { 0   otherwise,
 	IsZero = Name("isz", Recurse(Constant(1), Extend(Zero, 2)))
+
+	// IsNotZero(x) = { 0   if x = 0,
+	//                { 1   otherwise,
 	IsNotZero = Sign
 
+	// IsEqual(x, y) = { 1   if x = y,
+	//                 { 0   otherwise,
 	IsEqual = IsZero.Compose(Difference)
+	// IsEqual(x, y) = { 1   if x ≠ y,
+	//                 { 0   otherwise,
 	IsNotEqual = IsNotZero.Compose(Difference)
 
+	// IsLessThanOrEqual(x, y) = { 1   if x ≤ y,
+	//                           { 0   otherwise,
 	IsLessThanOrEqual = IsZero.Compose(Subtraction)
-	IsGreaterThan = IsZero.Compose(Subtraction)
+	// IsGreaterThan(x, y) = { 1   if x > y,
+	//                       { 0   otherwise,
+	IsGreaterThan = IsNotZero.Compose(Subtraction)
 
+	// IsLessThan(x, y) = { 1   if x < y,
+	//                    { 0   otherwise,
 	IsLessThan = IsNotZero.Compose(ReverseSubtraction)
+	// IsGreatherThanOrEqual(x, y) = { 1   if x ≥ y,
+	//                               { 0   otherwise,
 	IsGreaterThanOrEqual = IsZero.Compose(ReverseSubtraction)
 
+	// LogicalNot(x) = { 1   if x = 0,
+	//                 { 0   otherwise,
 	LogicalNot = Name("not", IsZero)
+	// LogicalValue(x) = { 1   if x ≠ 0,
+	//                   { 0   otherwise,
 	LogicalValue = IsNotZero
 
-	LogicalAnd = Multiplication.Compose(
-			LogicalValue.Compose(Project(2, 1)),
-			LogicalValue.Compose(Project(2, 2)),
-	)
-	LogicalOr  = LogicalValue.Compose( // result could be 2… so, clamp to {0,1} again
-			Addition.Compose(
-				LogicalValue.Compose(Project(2, 1)),
-				LogicalValue.Compose(Project(2, 2)),
-			),
-	)
-	LogicalXor = Difference.Compose(
-			LogicalValue.Compose(Project(2, 1)),
-			LogicalValue.Compose(Project(2, 2)),
-	)
+	// LogicalAnd(x, y) = x ∧ y
+	LogicalAnd = Name("and", PredicateArgs(Multiplication))
+	// LogicalOr(x, y) = x ∨ y
+	// result could be 2… so, clamp to {0,1} again
+	LogicalOr  = Name("or", LogicalValue.Compose(PredicateArgs(Addition)))
+	// LogicalXor(x, y) = x ⊻ y
+	LogicalXor = Name("xor", PredicateArgs(Difference))
 
+	// Remainder(x, y) = { 0         if x = 0 ∨ y = 0,
+	//                   { x mod y   otherwise,
 	Remainder = Name("rem", IfNotZero(Project(2, 2),
 		// rem(0, y) = 0
 		// rem(y, 0) = 0
-		// rem(x+1, y) = sgn(|rem(x, y) + 1 - y|) * rem(x, y)
+		// rem(x+1, y) = sgn(|rem(x, y) + 1 - y|) * (rem(x, y) + 1)
 		Recurse(
 			Extend(Zero, 1),
 			IfNotZero(
@@ -91,6 +109,8 @@ var (
 		),
 	))
 
+	// Quotient(x, y) = { 0         if x = 0 ∨ y = 0,
+	//                  { ⌊x / y⌋   otherwise,
 	Quotient = Name("quo", IfNotZero(Project(2, 2),
 		// q(0, y) = 0
 		// q(x, 0) = 0
