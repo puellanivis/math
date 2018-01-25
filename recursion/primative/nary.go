@@ -16,7 +16,7 @@ func (f *funcN) Compose(g ...Func) Func {
 
 func (f *funcN) Apply(x ...uint) uint {
 	if f.ary != uint(len(x)) {
-		panic(fmt.Sprintf("function is %d-ary, was given %d inputs", len(x)))
+		panic(fmt.Sprintf("function is %d-ary, was given %d inputs", f.ary, len(x)))
 	}
 
 	return f.f(x...)
