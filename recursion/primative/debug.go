@@ -7,7 +7,7 @@ import (
 )
 
 func format(f Func, s fmt.State, verb rune) {
-	type verboser interface{
+	type verboser interface {
 		Verbose(prec int) string
 	}
 
@@ -54,6 +54,7 @@ type named struct {
 	Func
 }
 
+// Name returns a Func with the given name.
 func Name(name string, f Func) Func {
 	return &named{
 		name: name,
@@ -74,7 +75,7 @@ func (f *named) Verbose(prec int) string {
 		return fmt.Sprintf("%+v", f.Func)
 	}
 
-	return fmt.Sprintf("%.*v",  prec-1, f.Func)
+	return fmt.Sprintf("%.*v", prec-1, f.Func)
 }
 
 func (f *named) Format(s fmt.State, verb rune) {
@@ -86,7 +87,7 @@ func (f *named) Compose(g ...Func) Func {
 }
 
 func (f *named) extend(n uint) Func {
-	type extender interface{
+	type extender interface {
 		extend(uint) Func
 	}
 
@@ -97,6 +98,7 @@ func (f *named) extend(n uint) Func {
 	return Extend(f.Func, n)
 }
 
+// Debug returns a Func that will print its function, arguments, and result as a side-effect during Apply.
 func Debug(f Func) Func {
 	return &funcN{
 		ary: f.Ary(),
@@ -113,6 +115,7 @@ func Debug(f Func) Func {
 	}
 }
 
+// Panic returns a Func that will panic go as a side-effect during Apply.
 func Panic(v interface{}) Func {
 	s := fmt.Sprint(v)
 

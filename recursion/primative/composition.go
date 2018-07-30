@@ -21,12 +21,12 @@ func (c *composition) Apply(x ...uint) uint {
 		panic(fmt.Sprintf("%s is %d-ary, was given %d inputs", c, c.m, len(x)))
 	}
 
-	x_ := make([]uint, c.k)
+	xPrime := make([]uint, c.k)
 	for i := range c.g {
-		x_[i] = c.g[i].Apply(x...)
+		xPrime[i] = c.g[i].Apply(x...)
 	}
 
-	return c.f.Apply(x_...)
+	return c.f.Apply(xPrime...)
 }
 
 func (c *composition) Ary() uint {
@@ -69,6 +69,15 @@ func (c *composition) Format(s fmt.State, verb rune) {
 	format(c, s, verb)
 }
 
+// Compose returns the composition of f and a slice of Func g.
+//
+// Given a k-ary primitive recursive function f,
+// and k m-ary primitive recursive functions g₁,…,gₖ,
+// the composition of f with g₁,…,gₖ is the m-ary function h(x₁,…,xₘ)=f(g₁(x₁,…,xₘ),…,gₖ(x₁,…,xₘ))
+//
+// This function will panic if:
+// * `len(g) != f.Ary()`
+// * There exists an i such that `g[i].Ary() != g[0].Ary()`
 func Compose(f Func, g ...Func) Func {
 	k := f.Ary()
 

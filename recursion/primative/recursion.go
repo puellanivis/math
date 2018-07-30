@@ -32,29 +32,29 @@ func (r *recursion) Apply(x ...uint) uint {
 	}
 
 	// build "stack" frame…
-	x_ := make([]uint, len(x)+1)
+	xPrime := make([]uint, len(x)+1)
 
 	// OPTIMIZATION
 	// if the recursive function is a constant, then short-circuit any recursion, and argument assignment.
 	if g, ok := r.g.(*extendedConst); ok {
-		return g.Apply(x_...)
+		return g.Apply(xPrime...)
 	}
 
 	// x′ = { _, x₀-1, x₁, …, x_k }
-	x_[1] = x[0] - 1
-	copy(x_[2:], x[1:])
+	xPrime[1] = x[0] - 1
+	copy(xPrime[2:], x[1:])
 
 	// OPTIMIZATION
 	// if the recursive function is a projection with i > 1, then we can short-circuit any recursion.
 	if p, ok := r.g.(*projection); ok && p.i > 0 {
-		return p.Apply(x_...)
+		return p.Apply(xPrime...)
 	}
 
 	// x′₀ = h(x₀-1, x₁, …, x_k)
-	x_[0] = r.Apply(x_[1:]...)
+	xPrime[0] = r.Apply(xPrime[1:]...)
 
 	// h(x₀, x₁, …, x_k) = g(h(x₀-1, x₁, …, x_k), x₀-1, x₁, …, x_k)
-	return r.g.Apply(x_...)
+	return r.g.Apply(xPrime...)
 }
 
 func (r *recursion) Ary() uint {
@@ -81,6 +81,9 @@ func (r *recursion) Format(s fmt.State, verb rune) {
 	format(r, s, verb)
 }
 
+// Recurse returns the primative recursion of f over g.
+//	h(0, x₁, … xₖ)     = f(x₁, …, xₖ)
+//	h(S(y), x₁, …, xₖ) = g(h(y, x₁, …, xₖ), y, x₁, …, xₖ)
 func Recurse(f, g Func) Func {
 	k := f.Ary()
 

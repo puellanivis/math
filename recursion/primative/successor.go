@@ -6,11 +6,11 @@ import (
 
 type successor struct{}
 
-func (s successor) Compose(g ...Func) Func {
-	return Compose(s, g...)
+func (S successor) Compose(g ...Func) Func {
+	return Compose(S, g...)
 }
 
-func (s successor) Apply(x ...uint) uint {
+func (S successor) Apply(x ...uint) uint {
 	if len(x) != 1 {
 		panic(fmt.Sprintf("Successor is 1-ary, was given %d inputs", len(x)))
 	}
@@ -22,11 +22,11 @@ func (s successor) Apply(x ...uint) uint {
 	return x[0] + 1
 }
 
-func (s successor) Ary() uint {
+func (S successor) Ary() uint {
 	return 1
 }
 
-func (s successor) String() string {
+func (S successor) String() string {
 	return "S"
 }
 
@@ -34,8 +34,11 @@ func (S successor) Format(s fmt.State, verb rune) {
 	format(S, s, verb)
 }
 
+// Successor is the successor function.
 var Successor successor
 
+// SuccessorOf returns the successor of the given function.
+// 	S(k) = k + 1
 func SuccessorOf(f Func) Func {
 	return Compose(Successor, f)
 }

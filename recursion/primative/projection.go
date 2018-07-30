@@ -8,6 +8,12 @@ type projection struct {
 	n, i uint
 }
 
+// Project returns a projection function that returns the i-th argument of n arguments.
+//
+// For every n≥1 and each i with 1≤i≤n,
+// the n-ary projection function Pin,
+// which returns its i-th argument,
+// is primitive recursive.
 func Project(n, i uint) Func {
 	if n == 0 {
 		panic("projection cannot be 0-ary")

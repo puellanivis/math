@@ -6,8 +6,8 @@ import (
 
 type funcN struct {
 	ary uint
-	f func(...uint) uint
-	s string
+	f   func(...uint) uint
+	s   string
 }
 
 func (f *funcN) Compose(g ...Func) Func {

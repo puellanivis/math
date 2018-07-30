@@ -63,7 +63,7 @@ func endExtend(f Func, n uint) Func {
 
 	args := make([]Func, k)
 	for i := range args {
-		args[i] = Project(n, (n-k) + uint(i)+1)
+		args[i] = Project(n, (n-k)+uint(i)+1)
 	}
 
 	return f.Compose(args...)
@@ -81,7 +81,7 @@ func Extend(f Func, n uint) Func {
 		return f
 	}
 
-	type extender interface{
+	type extender interface {
 		extend(uint) Func
 	}
 
@@ -140,6 +140,8 @@ func Reverse(f Func) Func {
 	return f.Compose(args...)
 }
 
+// Exponentiate returns a an exponentiation of a function and a given base-case.
+//
 // Eponentiate(b:ℕ¹→ℕ¹, f:ℕ^k→ℕ¹) := g(x₀, …, x_k) = { b(x₁, …, x_k)                       when x₀ = 0,
 //                                                   { f(g(x-1, x₁, …, x_n), x₁, …, x_n)   otherwise,
 func Exponentiate(base, f Func) Func {
@@ -161,14 +163,18 @@ func Exponentiate(base, f Func) Func {
 	)
 }
 
+// IfNotZero returns a function that will be `then` when `cond` is logically true.
 func IfNotZero(cond Func, then Func) Func {
 	return Multiplication.Compose(LogicalValue.Compose(cond), then)
 }
 
+// IfZero returns a function that is `then` when `cond` is logicall not true.
 func IfZero(cond Func, then Func) Func {
 	return Multiplication.Compose(LogicalNot.Compose(cond), then)
 }
 
+// IfThenElse returns a function that will be `then` when `cond` is logically true,
+// and `otherwise` when cond is logically false.
 func IfThenElse(cond Func, then Func, otherwise Func) Func {
 	return Addition.Compose(
 		IfNotZero(cond, then),
@@ -177,7 +183,7 @@ func IfThenElse(cond Func, then Func, otherwise Func) Func {
 }
 
 // ProductSeries returns a function that multiplies a series of applications of a function.
-// 	g(x₀, …, x_k) = ∏_{n=0}^x₀ f(n, x₁, …, x_k) 
+// 	g(x₀, …, x_k) = ∏_{n=0}^x₀ f(n, x₁, …, x_k)
 func ProductSeries(f Func) Func {
 	k := f.Ary()
 
@@ -191,7 +197,7 @@ func ProductSeries(f Func) Func {
 }
 
 // Summation returns a function that sums a series of applications of a function.
-// 	g(x₀, …, x_k) = ∑_{n=0}^x₀ f(n, x₁, …, x_k) 
+// 	g(x₀, …, x_k) = ∑_{n=0}^x₀ f(n, x₁, …, x_k)
 func Summation(f Func) Func {
 	k := f.Ary()
 

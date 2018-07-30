@@ -58,7 +58,7 @@ func (c *extendedConst) Apply(x ...uint) uint {
 	}
 
 	return uint(c.c)
-} 
+}
 
 func (c *extendedConst) Ary() uint {
 	return c.n
@@ -89,4 +89,4 @@ func (c *extendedConst) extend(n uint) Func {
 		n: n,
 		c: c.c,
 	})
-} 
+}

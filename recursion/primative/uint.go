@@ -4,15 +4,15 @@ import (
 	"math"
 )
 
-type UintType interface {
-	Clone() UintType
-	Increment() UintType
-	Decrement() UintType
+type uintType interface {
+	Clone() uintType
+	Increment() uintType
+	Decrement() uintType
 }
 
 type bigUint []uint
 
-func (u bigUint) Clone() UintType {
+func (u bigUint) Clone() uintType {
 	e := 0
 	if u.allOnes() {
 		// if we are all ones, then extend the clone by one
@@ -46,7 +46,7 @@ func (u bigUint) allZeros() bool {
 	return test == 0
 }
 
-func (u bigUint) Increment() UintType {
+func (u bigUint) Increment() uintType {
 	for i := range u {
 		u[i]++
 
@@ -59,7 +59,7 @@ func (u bigUint) Increment() UintType {
 	return append(u, 1)
 }
 
-func (u bigUint) Decrement() UintType {
+func (u bigUint) Decrement() uintType {
 	if u.allZeros() {
 		return simpleUint(0)
 	}
@@ -77,11 +77,11 @@ func (u bigUint) Decrement() UintType {
 
 type simpleUint uint
 
-func (u simpleUint) Clone() UintType {
+func (u simpleUint) Clone() uintType {
 	return u
 }
 
-func (u simpleUint) Increment() UintType {
+func (u simpleUint) Increment() uintType {
 	u++
 
 	if u == 0 {
@@ -91,7 +91,7 @@ func (u simpleUint) Increment() UintType {
 	return u
 }
 
-func (u simpleUint) Decrement() UintType {
+func (u simpleUint) Decrement() uintType {
 	if u == 0 {
 		return u
 	}
@@ -99,20 +99,20 @@ func (u simpleUint) Decrement() UintType {
 	return u - 1
 }
 
-func uintFromFloat(k float64) UintType {
+func uintFromFloat(k float64) uintType {
 	if k == 0 {
 		return simpleUint(0)
 	}
 
 	l := math.Ceil(math.Log2(k) / 64)
 	if l <= 1 {
-		return Uint(uint64(k))
+		return uintValue(uint64(k))
 	}
 
 	panic("float is too large")
 }
 
-func Uint(k interface{}) UintType {
+func uintValue(k interface{}) uintType {
 	switch k := k.(type) {
 	case int8:
 		if k >= 0 {
@@ -128,7 +128,7 @@ func Uint(k interface{}) UintType {
 		}
 	case int64:
 		if k >= 0 {
-			return Uint(uint64(k))
+			return uintValue(uint64(k))
 		}
 
 	case uint8:
