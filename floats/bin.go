@@ -81,7 +81,6 @@ type binary[SPEC spec[D], D datum] struct {
 	s bool
 	e int
 	m D
-	r D
 }
 
 func fromBigFloat[SPEC spec[D], D datum](v *big.Float, rounding RoundingMode) D {
@@ -319,8 +318,12 @@ func convert[SPEC1 spec[D1], SPEC2 spec[D2], D1, D2 datum](bits D1, rounding Rou
 
 	if Δw < 0 {
 		// we’re scaling down, cast after the shift or we will clip out the part we need.
-		set(&g.r, spec1.Shr(f.m, -Δw-spec2.width()))
 		set(&g.m, spec1.Shr(f.m, -Δw))
+		if spec2.IsZero(g.m) && !spec1.IsZero(f.m) {
+			// If we got zero, but we did not start with zero,
+			// then we round up the the least-significant guard bit.
+			g.m = spec2.Inc(g.m)
+		}
 	} else {
 		// we’re scaling up, cast before the shift or we will shift the whole thing into the bitbucket.
 		set(&g.m, f.m)
@@ -364,39 +367,34 @@ func convert[SPEC1 spec[D1], SPEC2 spec[D2], D1, D2 datum](bits D1, rounding Rou
 
 func (f *binary[SPEC, D]) trunc() {
 	var spec SPEC
-	var z D
 
 	f.m = spec.Mask(f.m, incAway[SPEC]())
-	f.r = z
 }
 
 func (f *binary[SPEC, D]) shr(shift int) {
 	var spec SPEC
 
-	f.r = spec.Shr(f.r, shift)
-	if lshift := spec.width() - shift; lshift >= 0 {
-		f.r = spec.Or(f.r, spec.Shl(f.m, lshift))
+	start := f.m
+	f.m = spec.Shr(start, shift)
+	if spec.IsZero(f.m) && !spec.IsZero(start) {
+		// If we got zero, but did not start with zero,
+		// then we round up into the least-significant guard bit.
+		f.m = spec.Inc(f.m)
 	}
-	f.m = spec.Shr(f.m, shift)
 }
 
 func (f *binary[SPEC, D]) shl(shift int) {
 	var spec SPEC
 
 	f.m = spec.Shl(f.m, shift)
-	if rshift := spec.width() - shift; rshift >= 0 {
-		f.m = spec.Or(f.m, spec.Shr(f.r, rshift))
-	}
-	f.r = spec.Shl(f.r, shift)
 }
 
-func (f *binary[SPEC, D]) add(inc, rem D) {
+func (f *binary[SPEC, D]) add(inc D) {
 	var spec SPEC
 	var z D
 
 	var carry D
-	f.r, carry = spec.Add(f.r, rem, z)
-	f.m, carry = spec.Add(f.m, inc, carry)
+	f.m, carry = spec.Add(f.m, inc, z)
 	f.e += spec.Int(carry)
 
 	if f.e == expMax[SPEC]() {
@@ -408,13 +406,11 @@ func (f *binary[SPEC, D]) add(inc, rem D) {
 	f.m = spec.Rotl(f.m, -spec.Int(carry))
 }
 
-func (f *binary[SPEC, D]) sub(dec, rem D) {
+func (f *binary[SPEC, D]) sub(dec D) {
 	var spec SPEC
 	var z D
 
-	var borrow D
-	f.r, borrow = spec.Sub(f.r, rem, z)
-	f.m, _ = spec.Sub(f.m, dec, borrow)
+	f.m, _ = spec.Sub(f.m, dec, z)
 	f.renorm()
 
 	if spec.IsZero(f.m) {
@@ -437,7 +433,13 @@ func (f *binary[SPEC, D]) mulPrim(g *binary[SPEC, D]) {
 		return
 	}
 
-	f.m, f.r = spec.Mul(f.m, g.m)
+	var lo D
+	f.m, lo = spec.Mul(f.m, g.m)
+
+	if !spec.IsZero(lo) {
+		// Round a non-zero low word result up into the least-significant guard bit.
+		f.m = spec.Inc(f.m)
+	}
 
 	f.renorm()
 
@@ -467,7 +469,13 @@ func (f *binary[SPEC, D]) divPrim(g *binary[SPEC, D]) {
 		return
 	}
 
-	f.m, f.r = spec.Div(f.m, f.r, g.m)
+	var rem D
+	f.m, rem = spec.Div(f.m, z, g.m)
+
+	if !spec.IsZero(rem) {
+		// Round a non-zero remainder up into the least-significant guard bit.
+		f.m = spec.Inc(f.m)
+	}
 
 	f.renorm()
 
@@ -717,9 +725,9 @@ func add[SPEC spec[D], D datum](x, y D, rounding RoundingMode) D {
 	g.shr(f.e - g.e)
 
 	if f.s != g.s {
-		f.sub(g.m, g.r)
+		f.sub(g.m)
 	} else {
-		f.add(g.m, g.r)
+		f.add(g.m)
 	}
 
 	applyRounding(&f, rounding)
@@ -1260,9 +1268,9 @@ func madd[SPEC spec[D], D datum](x, y, z D, rounding RoundingMode) D {
 	h.shr(f.e - h.e)
 
 	if f.s != h.s {
-		f.sub(h.m, h.r)
+		f.sub(h.m)
 	} else {
-		f.add(h.m, h.r)
+		f.add(h.m)
 	}
 
 	applyRounding(&f, rounding)

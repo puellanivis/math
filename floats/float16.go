@@ -45,7 +45,7 @@ func Float16WithRoundFromBits[RND RoundingMode](bits uint16) Float16WithRound[RN
 	return Float16WithRound[RND]{bits}
 }
 
-// Float16WithRoundFromFloat returns the IEEE 754 floating-point number closest in representation to the given floating-point argument,
+// Float16FromFloat returns the IEEE 754 floating-point number closest in representation to the given floating-point argument,
 // using the RoundTiesToEven rounding mode.
 func Float16FromFloat[F ~float32 | ~float64 | *big.Float](val F) Float16 {
 	return Float16WithRoundFromFloat[RoundTiesToEven](val)

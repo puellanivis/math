@@ -31,26 +31,24 @@ func incNear[SPEC spec[D], D datum]() D {
 	return spec.Pow2(spec.expWidth() - 1)
 }
 
-func incNearEven[SPEC spec[D], D datum](x D) (m, r D) {
+func incNearEven[SPEC spec[D], D datum](x D) D {
 	var spec SPEC
 	var z D
 
 	x = spec.And(spec.Shr(x, spec.expWidth()), spec.Pow2(0))
 
-	r, carry := spec.Add(spec.Not(z), x, z)
-	m, _ = spec.Add(incNear[SPEC](), spec.Not(z), carry)
-	return m, r
+	m, _ := spec.Add(incNear[SPEC](), spec.Not(z), x)
+	return m
 }
 
-func incNearOdd[SPEC spec[D], D datum](x D) (m, r D) {
+func incNearOdd[SPEC spec[D], D datum](x D) D {
 	var spec SPEC
 	var z D
 
 	x = spec.And(spec.Not(spec.Shr(x, spec.expWidth())), spec.Pow2(0))
 
-	r, carry := spec.Add(spec.Not(z), x, z)
-	m, _ = spec.Add(incNear[SPEC](), spec.Not(z), carry)
-	return m, r
+	m, _ := spec.Add(incNear[SPEC](), spec.Not(z), x)
+	return m
 }
 
 func overflow[SPEC spec[D], D datum](sign bool, rounding RoundingMode) D {
@@ -127,7 +125,7 @@ func (RoundTowardPositive) round16(f *binary[binary16, uint16]) {
 	case inf, nan:
 	case !f.s:
 		// for positive numbers, this is a round away from zero.
-		f.add(incAway[binary16](), 0)
+		f.add(incAway[binary16]())
 		fallthrough
 	default:
 		// for negative numbers, this is a truncation
@@ -141,7 +139,7 @@ func (RoundTowardPositive) round32(f *binary[binary32, uint32]) {
 	case inf, nan:
 	case !f.s:
 		// for positive numbers, this is a round away from zero.
-		f.add(incAway[binary32](), 0)
+		f.add(incAway[binary32]())
 		fallthrough
 	default:
 		// for negative numbers, this is a truncation
@@ -155,7 +153,7 @@ func (RoundTowardPositive) round64(f *binary[binary64, uint64]) {
 	case inf, nan:
 	case !f.s:
 		// for positive numbers, this is a round away from zero.
-		f.add(incAway[binary64](), 0)
+		f.add(incAway[binary64]())
 		fallthrough
 	default:
 		// for negative numbers, this is a truncation
@@ -169,7 +167,7 @@ func (RoundTowardPositive) round128(f *binary[binary128, bits.Uint128]) {
 	case inf, nan:
 	case !f.s:
 		// for positive numbers, this is a round away from zero.
-		f.add(incAway[binary128](), bits.Uint128{})
+		f.add(incAway[binary128]())
 		fallthrough
 	default:
 		// for negative numbers, this is a truncation
@@ -183,7 +181,7 @@ func (RoundTowardPositive) roundBF16(f *binary[bfloat16, uint16]) {
 	case inf, nan:
 	case !f.s:
 		// for positive numbers, this is a round away from zero.
-		f.add(incAway[binary16](), 0)
+		f.add(incAway[binary16]())
 		fallthrough
 	default:
 		// for negative numbers, this is a truncation
@@ -207,7 +205,7 @@ func (RoundTowardNegative) round16(f *binary[binary16, uint16]) {
 	case inf, nan:
 	case f.s:
 		// for negative numbers, this is a round away from zero.
-		f.add(incAway[binary16](), 0)
+		f.add(incAway[binary16]())
 		fallthrough
 	default:
 		// for positive numbers, this is a truncation.
@@ -221,7 +219,7 @@ func (RoundTowardNegative) round32(f *binary[binary32, uint32]) {
 	case inf, nan:
 	case f.s:
 		// for negative numbers, this is a round away from zero.
-		f.add(incAway[binary32](), 0)
+		f.add(incAway[binary32]())
 		fallthrough
 	default:
 		// for positive numbers, this is a truncation.
@@ -235,7 +233,7 @@ func (RoundTowardNegative) round64(f *binary[binary64, uint64]) {
 	case inf, nan:
 	case f.s:
 		// for negative numbers, this is a round away from zero.
-		f.add(incAway[binary64](), 0)
+		f.add(incAway[binary64]())
 		fallthrough
 	default:
 		// for positive numbers, this is a truncation.
@@ -249,7 +247,7 @@ func (RoundTowardNegative) round128(f *binary[binary128, bits.Uint128]) {
 	case inf, nan:
 	case f.s:
 		// for negative numbers, this is a round away from zero.
-		f.add(incAway[binary128](), bits.Uint128{})
+		f.add(incAway[binary128]())
 		fallthrough
 	default:
 		// for positive numbers, this is a truncation.
@@ -263,7 +261,7 @@ func (RoundTowardNegative) roundBF16(f *binary[bfloat16, uint16]) {
 	case inf, nan:
 	case f.s:
 		// for negative numbers, this is a round away from zero.
-		f.add(incAway[binary16](), 0)
+		f.add(incAway[binary16]())
 		fallthrough
 	default:
 		// for positive numbers, this is a truncation.
@@ -288,7 +286,7 @@ func (RoundTiesToAway) round16(f *binary[binary16, uint16]) {
 	if inf || nan {
 		return
 	}
-	f.add(incNear[binary16](), 0)
+	f.add(incNear[binary16]())
 	f.trunc()
 }
 
@@ -297,7 +295,7 @@ func (RoundTiesToAway) round32(f *binary[binary32, uint32]) {
 	if inf || nan {
 		return
 	}
-	f.add(incNear[binary32](), 0)
+	f.add(incNear[binary32]())
 	f.trunc()
 }
 
@@ -306,7 +304,7 @@ func (RoundTiesToAway) round64(f *binary[binary64, uint64]) {
 	if inf || nan {
 		return
 	}
-	f.add(incNear[binary64](), 0)
+	f.add(incNear[binary64]())
 	f.trunc()
 }
 
@@ -315,7 +313,7 @@ func (RoundTiesToAway) round128(f *binary[binary128, bits.Uint128]) {
 	if inf || nan {
 		return
 	}
-	f.add(incNear[binary128](), bits.Uint128{})
+	f.add(incNear[binary128]())
 	f.trunc()
 }
 
@@ -324,7 +322,7 @@ func (RoundTiesToAway) roundBF16(f *binary[bfloat16, uint16]) {
 	if inf || nan {
 		return
 	}
-	f.add(incNear[binary16](), 0)
+	f.add(incNear[binary16]())
 	f.trunc()
 }
 
