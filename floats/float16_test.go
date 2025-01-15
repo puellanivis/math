@@ -93,21 +93,21 @@ func TestFloat16Numbers(t *testing.T) {
 		{"pi", math.Pi, 0x4248},
 		{"of", float32(exp2of), exp2ofBits}, // abs(overflow)
 		{"uf", float32(exp2uf), exp2ufBits}, // abs(underflow)
-		{"epsilon", 0x1p-12, 0x0c00},
-		{"epsilon", 0x1p-13, 0x0800},
-		{"epsilon", 0x1p-14, 0x0400},
-		{"epsilon", 0x1p-15, 0x0200},
-		{"epsilon", 0x1p-16, 0x0100},
-		{"epsilon", 0x1p-17, 0x0080},
-		{"epsilon", 0x1p-18, 0x0040},
-		{"epsilon", 0x1p-19, 0x0020},
-		{"epsilon", 0x1p-20, 0x0010},
-		{"epsilon", 0x1p-21, 0x0008},
-		{"epsilon", 0x1p-22, 0x0004},
-		{"epsilon", 0x1p-23, 0x0002},
-		{"epsilon", 0x1p-24, 0x0001},
-		{"epsilon", 0x1p-25, 0x0000}, // round towards even
-		{"epsilon", 0x1p-26, 0x0000},
+		{"epsilon12", 0x1p-12, 0x0c00},
+		{"epsilon13", 0x1p-13, 0x0800},
+		{"epsilon14", 0x1p-14, 0x0400},
+		{"epsilon15", 0x1p-15, 0x0200},
+		{"epsilon16", 0x1p-16, 0x0100},
+		{"epsilon17", 0x1p-17, 0x0080},
+		{"epsilon18", 0x1p-18, 0x0040},
+		{"epsilon19", 0x1p-19, 0x0020},
+		{"epsilon20", 0x1p-20, 0x0010},
+		{"epsilon21", 0x1p-21, 0x0008},
+		{"epsilon22", 0x1p-22, 0x0004},
+		{"epsilon23", 0x1p-23, 0x0002},
+		{"epsilon24", 0x1p-24, 0x0001},
+		{"epsilon25", 0x1p-25, 0x0000}, // round towards even
+		{"epsilon26", 0x1p-26, 0x0000},
 	}
 
 	for _, tt := range tests {
