@@ -39,4 +39,7 @@ type Bits[U Uint] interface {
 	Lte(x, y U) bool
 	Gt(x, y U) bool
 	Gte(x, y U) bool
+
+	// Usefully, avoid needing to declare zero values.
+	IsZero(x U) bool
 }

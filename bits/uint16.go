@@ -141,6 +141,11 @@ func (Bits16) Eq(x, y uint16) bool {
 	return x == y
 }
 
+// IsZero returns true if x is zero.
+func (b Bits16) IsZero(x uint16) bool {
+	return b.Eq(x, 0)
+}
+
 // Neq returns true if x does not equal y.
 func (Bits16) Neq(x, y uint16) bool {
 	return x != y

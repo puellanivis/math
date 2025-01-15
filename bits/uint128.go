@@ -252,6 +252,11 @@ func (b Bits128) Eq(x, y Uint128) bool {
 	return b.Cmp(x, y) == 0
 }
 
+// IsZero returns true if x is zero.
+func (b Bits128) IsZero(x Uint128) bool {
+	return b.Eq(x, Uint128{})
+}
+
 // Neq returns true if x does not equal y.
 func (b Bits128) Neq(x, y Uint128) bool {
 	return b.Cmp(x, y) != 0

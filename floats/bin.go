@@ -140,7 +140,7 @@ func fromBigFloat[SPEC spec[D], D datum](v *big.Float, rounding RoundingMode) D 
 		g.e = 1
 	}
 
-	if spec.Eq(g.m, z) {
+	if spec.IsZero(g.m) {
 		// EXCEPTION: underflow
 		return z
 	}
@@ -249,12 +249,11 @@ func decomp[SPEC spec[D], D datum](bits D) (sign D, exp int, mant D) {
 
 func decode[SPEC spec[D], D datum](bits D) binary[SPEC, D] {
 	var spec SPEC
-	var z D
 
 	sign, exp, mant := decomp[SPEC](bits)
 
 	f := binary[SPEC, D]{
-		s: spec.Neq(sign, z),
+		s: !spec.IsZero(sign),
 		e: int(exp),
 		m: spec.Shl(mant, spec.expWidth()),
 	}
@@ -351,9 +350,8 @@ func convert[SPEC1 spec[D1], SPEC2 spec[D2], D1, D2 datum](bits D1, rounding Rou
 	}
 
 	var spec SPEC2
-	var z D2
 
-	if spec.Eq(g.m, z) {
+	if spec.IsZero(g.m) {
 		// EXCEPTION: underflow
 	}
 
@@ -419,7 +417,7 @@ func (f *binary[SPEC, D]) sub(dec, rem D) {
 	f.m, _ = spec.Sub(f.m, dec, borrow)
 	f.renorm()
 
-	if spec.Eq(f.m, z) {
+	if spec.IsZero(f.m) {
 		f.s = false
 	}
 }
@@ -504,30 +502,29 @@ func (f binary[SPEC, D]) classify() (inf, nan bool) {
 	}
 
 	var spec SPEC
-	var z D
 
-	return spec.Eq(f.m, z), spec.Neq(f.m, z)
+	isInf := spec.IsZero(f.m)
+
+	return isInf, !isInf
 }
 
 func (f binary[SPEC, D]) isNaN() bool {
 	var spec SPEC
-	var z D
 
-	return f.e == expMax[SPEC]() && spec.Neq(f.m, z)
+	return f.e == expMax[SPEC]() && !spec.IsZero(f.m)
 }
 
 func (f binary[SPEC, D]) isInf() bool {
 	var spec SPEC
 	var z D
 
-	return f.e == expMax[SPEC]() && spec.Eq(f.m, z)
+	return f.e == expMax[SPEC]() && spec.IsZero(f.m)
 }
 
 func (f binary[SPEC, D]) isZero() bool {
 	var spec SPEC
-	var z D
 
-	return f.e == 1 && spec.Eq(f.m, z)
+	return f.e == 1 && spec.IsZero(f.m)
 }
 
 func (f *binary[SPEC, D]) ilogb() int {
@@ -545,10 +542,9 @@ func format[SPEC spec[D], D datum](x D, f fmt.State, verb rune, rounding Roundin
 	switch verb {
 	case 'b':
 		var spec SPEC
-		var z D
 
 		s, e, m := decomp[SPEC](x)
-		if spec.Neq(s, z) {
+		if !spec.IsZero(s) {
 			fmt.Fprintf(f, "1_%0*b_%0*b", spec.expWidth(), e, spec.mantWidth(), m)
 		} else {
 			fmt.Fprintf(f, "0_%0*b_%0*b", spec.expWidth(), e, spec.mantWidth(), m)
@@ -598,24 +594,22 @@ func isInf[SPEC spec[D], D datum](x D) bool {
 
 func signBit[SPEC spec[D], D datum](x D) bool {
 	var spec SPEC
-	var z D
 
 	s, _ := mag[SPEC](x)
 
-	return spec.Neq(s, z)
+	return !spec.IsZero(s)
 }
 
 func getSign[SPEC spec[D], D datum](x D) int {
 	var spec SPEC
-	var z D
 
 	s, m := mag[SPEC](x)
 
-	if spec.Eq(m, z) {
+	if spec.IsZero(m) {
 		return 0
 	}
 
-	if spec.Neq(s, z) {
+	if !spec.IsZero(s) {
 		return -1
 	}
 
@@ -648,18 +642,18 @@ func nextUp[SPEC spec[D], D datum](x D) D {
 	s, m := mag[SPEC](x)
 
 	if spec.Gte(m, magInf[SPEC]()) {
-		if spec.Eq(s, z) || spec.Gt(m, magInf[SPEC]()) {
+		if spec.IsZero(s) || spec.Gt(m, magInf[SPEC]()) {
 			// +∞ and NaN do not change
 			return x
 		}
 	}
 
-	if spec.Eq(m, z) {
+	if spec.IsZero(m) {
 		// ±zero is smallest positive sub-normal
 		return spec.Inc(z)
 	}
 
-	if spec.Neq(s, z) {
+	if !spec.IsZero(s) {
 		return spec.Dec(x)
 	}
 
@@ -673,18 +667,18 @@ func nextDown[SPEC spec[D], D datum](x D) D {
 	s, m := mag[SPEC](x)
 
 	if spec.Gte(m, magInf[SPEC]()) {
-		if spec.Neq(s, z) || spec.Gt(m, magInf[SPEC]()) {
+		if !spec.IsZero(s) || spec.Gt(m, magInf[SPEC]()) {
 			// -∞ and NaN do not change
 			return x
 		}
 	}
 
-	if spec.Eq(m, z) {
+	if spec.IsZero(m) {
 		// ±zero is smallest negative sub-normal
 		return spec.Or(signMask[SPEC](), spec.Inc(z))
 	}
 
-	if spec.Neq(s, z) {
+	if !spec.IsZero(s) {
 		return spec.Inc(x)
 	}
 
@@ -750,7 +744,7 @@ func dim[SPEC spec[D], D datum](x, y D, rounding RoundingMode) D {
 		return diff // NaN → NaN
 	}
 
-	if spec.Neq(s, z) {
+	if !spec.IsZero(s) {
 		// diff < 0, return zero.
 		return z
 	}
@@ -804,14 +798,13 @@ func fcmp[SPEC spec[D], D datum](x, y D) (order int, ordered bool) {
 
 	if spec.Neq(xs, ys) {
 		// signs differ
-		var z D
 
-		if spec.Eq(spec.Or(xm, ym), z) {
+		if spec.IsZero(spec.Or(xm, ym)) {
 			// special case: ±zero == ∓zero
 			return 0, true
 		}
 
-		if spec.Neq(xs, z) {
+		if !spec.IsZero(xs) {
 			// left is negative, and right is opposite
 			return -1, true
 		}
@@ -986,10 +979,9 @@ func frexp[SPEC spec[D], D datum](x D) (frac D, exp int) {
 	_, m := mag[SPEC](x)
 
 	var spec SPEC
-	var z D
 
 	switch {
-	case spec.Eq(m, z):
+	case spec.IsZero(m):
 		return x, 0 // correctly return -0
 	case spec.Gte(m, magInf[SPEC]()):
 		return x, 0
@@ -1010,7 +1002,7 @@ func ldexp[SPEC spec[D], D datum](frac D, exp int) D {
 	var z D
 
 	switch {
-	case spec.Eq(m, z):
+	case spec.IsZero(m):
 		return frac // ±0
 	case spec.Gte(m, magInf[SPEC]()):
 		return frac // ±∞ and NaN
@@ -1087,7 +1079,7 @@ func roundToEven[SPEC spec[D], D datum](x D) D {
 	e -= expBias[SPEC]()
 	if e < 0 {
 		// Round abs(x) < 1 including denormals.
-		if e == -1 && spec.Neq(m, z) {
+		if e == -1 && !spec.IsZero(m) {
 			// e == bias-1 and m == 0 is one half, which rounds down to zero (even).
 			// Every other mantissa is greater than one-half, so round away from zero.
 			return spec.Or(s, one[SPEC]()) // ±1
@@ -1121,9 +1113,8 @@ func floor[SPEC spec[D], D datum](x D) D {
 	s, m := mag[SPEC](x)
 
 	var spec SPEC
-	var z D
 
-	if spec.Eq(m, z) {
+	if spec.IsZero(m) {
 		// zeros return themselves.
 		return x
 	}
@@ -1133,13 +1124,13 @@ func floor[SPEC spec[D], D datum](x D) D {
 		return x
 	}
 
-	if spec.Eq(s, z) {
+	if spec.IsZero(s) {
 		// positive numbers round toward zero.
 		return trunc[SPEC](x)
 	}
 
 	d, fract := modf[SPEC](spec.Xor(x, s))
-	if spec.Neq(fract, z) {
+	if !spec.IsZero(fract) {
 		d = add[SPEC](d, one[SPEC](), RoundTowardZero{})
 	}
 	return spec.Or(d, s)
@@ -1371,7 +1362,6 @@ func mod[SPEC spec[D], D datum](x, y D, rounding RoundingMode) D {
 	_, ym := mag[SPEC](y)
 
 	var spec SPEC
-	var z D
 
 	switch {
 	case spec.Gt(xm, magInf[SPEC]()):
@@ -1383,7 +1373,7 @@ func mod[SPEC spec[D], D datum](x, y D, rounding RoundingMode) D {
 		// EXCEPTION: invalid operation: mod(±∞, y)
 		return nan[SPEC]()
 
-	case spec.Eq(ym, z):
+	case spec.IsZero(ym):
 		// EXCEPTION: invalid operation: mod(x, 0)
 		return nan[SPEC]()
 
@@ -1411,8 +1401,8 @@ func sqrt[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 	var z D
 
 	switch {
-	case spec.Eq(m, z) || spec.Gte(m, magInf[SPEC]()):
-		if spec.Neq(m, magInf[SPEC]()) || spec.Eq(sign, z) {
+	case spec.IsZero(m) || spec.Gte(m, magInf[SPEC]()):
+		if spec.Neq(m, magInf[SPEC]()) || spec.IsZero(sign) {
 			// either: not Infinity, or positive sign
 			return x
 		}
@@ -1420,7 +1410,7 @@ func sqrt[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 		// √(-∞), fallthrough to exception
 		fallthrough
 
-	case spec.Neq(sign, z):
+	case !spec.IsZero(sign):
 		// EXCEPTION: illegal operation: √(-f)
 		return nan[SPEC]()
 	}
@@ -1448,7 +1438,7 @@ func sqrt[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 	x = spec.Shl(x, 1)
 	var q, s D                // q = sqrt(x)
 	r := spec.Pow2(shift + 1) // r = moving bit from MSB to LSB
-	for spec.Neq(r, z) {
+	for !spec.IsZero(r) {
 		t, _ := spec.Add(s, r, z)
 		if spec.Lte(t, x) {
 			s, _ = spec.Add(t, r, z)
@@ -1460,7 +1450,7 @@ func sqrt[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 	}
 
 	// final rounding
-	if spec.Neq(x, z) {
+	if !spec.IsZero(x) {
 		q, _ = spec.Add(q, spec.And(q, spec.Pow2(0)), z)
 	}
 
@@ -1479,7 +1469,7 @@ func rsqrt[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 	switch {
 	case spec.Eq(x, magInf[SPEC]()):
 		return z // +0 with no exception
-	case spec.Eq(m, z):
+	case spec.IsZero(m):
 		// EXCEPTION: divide by zero
 		return spec.Or(s, magInf[SPEC]())
 	}
@@ -1509,7 +1499,7 @@ func hypot[SPEC spec[D], D datum](x, y D, rounding RoundingMode) D {
 		x, y = y, x
 	}
 
-	if spec.Eq(x, z) {
+	if spec.IsZero(x) {
 		return z
 	}
 
@@ -1536,7 +1526,7 @@ func exp[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 		// 2**∞ = ∞, NaN → NaN
 		return x
 
-	case spec.Eq(s, z):
+	case spec.IsZero(s):
 		if spec.Gte(m, overflowVal) {
 			// EXCEPTION: overflow
 			return overflow[SPEC](false, rounding)
@@ -1544,7 +1534,7 @@ func exp[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 
 		// argument reduction; x = r×lg(e) + k with |r| ≤ ln(2)/2.
 
-	case spec.Neq(s, z):
+	case !spec.IsZero(s):
 		if spec.Gt(m, underflowVal) {
 			// We’re dealing with abs(x) here, so it must be _greater than_ Underflow.
 
@@ -1584,13 +1574,13 @@ func exp2[SPEC spec[D], D datum](x D, rounding RoundingMode) D {
 		// 2**∞ = ∞, NaN → NaN
 		return x
 
-	case spec.Eq(s, z):
+	case spec.IsZero(s):
 		if spec.Gte(m, overflowVal) {
 			// EXCEPTION: overflow
 			return overflow[SPEC](false, rounding)
 		}
 
-	case spec.Neq(s, z):
+	case !spec.IsZero(s):
 		// We’re dealing with abs(x) here, so it must be _greater than_ Underflow.
 		if spec.Gt(m, underflowVal) {
 			// EXCEPTION: underflow
@@ -1645,10 +1635,9 @@ func ilogb[SPEC spec[D], D datum](x D) (int, bool) {
 	_, m := mag[SPEC](x)
 
 	var spec SPEC
-	var z D
 
 	switch {
-	case spec.Eq(m, z):
+	case spec.IsZero(m):
 		// EXCEPTION: invalid operation: ilogb(0) = ⟨implementation defined⟩
 		// But the result must be outside the range ±2×(emax+p-1)
 		return math.MinInt, false
@@ -1667,10 +1656,9 @@ func logb[SPEC spec[D], D datum](x D) D {
 	_, m := mag[SPEC](x)
 
 	var spec SPEC
-	var z D
 
 	switch {
-	case spec.Eq(m, z):
+	case spec.IsZero(m):
 		// EXCEPTION: divide by zero: logB(0) = -∞
 		return inf[SPEC](true)
 

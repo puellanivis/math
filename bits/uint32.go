@@ -125,6 +125,11 @@ func (Bits32) Eq(x, y uint32) bool {
 	return x == y
 }
 
+// IsZero returns true if x is zero.
+func (b Bits32) IsZero(x uint32) bool {
+	return b.Eq(x, 0)
+}
+
 // Neq returns true if x does not equal y.
 func (Bits32) Neq(x, y uint32) bool {
 	return x != y
