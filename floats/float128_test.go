@@ -37,6 +37,7 @@ func TestFloat128NumConstants(t *testing.T) {
 	p2π := bits.Uint128{Hi: 0x40021a6637e666f8, Lo: 0x34db52a7e461c2d8}
 	p2φ := bits.Uint128{Hi: 0x400088e77d62aa7b, Lo: 0x3b8037ce5204704f}
 
+	// Constants retrieved from Wolfram|Alpha:
 	tests := []test{
 		{"zero", "0", bits.Uint128{Hi: 0x0000_0000_0000_0000, Lo: 0}},
 		{"one", "1", bits.Uint128{Hi: 0x3fff_0000_0000_0000, Lo: 0}},
@@ -60,21 +61,25 @@ func TestFloat128NumConstants(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		f := new(big.Float).SetPrec(128)
-		if _, _, err := f.Parse(tt.value, 0); err != nil {
-			t.Fatal("unexpected error:", err)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			f := new(big.Float).SetPrec(256)
+			if _, _, err := f.Parse(tt.value, 0); err != nil {
+				t.Fatal("unexpected error:", err)
+			}
 
-		b128 := Float128FromFloat(f)
+			f = f.SetMode(big.ToNearestEven).SetPrec(128)
 
-		t.Logf("%s: %.34e %.34e", tt.name, f, b128)
-		t.Logf("%s: %032x", tt.name, b128.bits)
+			b128 := Float128FromFloat(f)
 
-		if b128.bits != tt.bits {
-			expected := Float128{tt.bits}
-			t.Logf("expected: %.34e, %b", expected, expected)
-			t.Errorf("Parse(%q):\n  actual: %032x\nexpected: %032x", tt.value, b128.bits, tt.bits)
-		}
+			t.Logf("%s: %.34e %.34e", tt.name, f, b128)
+			t.Logf("%s: %032x", tt.name, b128.bits)
+
+			if b128.bits != tt.bits {
+				expected := Float128{tt.bits}
+				t.Logf("expected: %.34e, %b", expected, expected)
+				t.Errorf("Parse(%q):\n  actual: %032x\nexpected: %032x", tt.value, b128.bits, tt.bits)
+			}
+		})
 	}
 }
 
