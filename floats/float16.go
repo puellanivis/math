@@ -163,8 +163,9 @@ func (x Float16WithRound[RND]) SignBit() bool {
 // Abs returns the absolute value of x.
 //
 // Special cases are:
-//   NaN.Abs() = NaN
-//   ±Inf.Abs() = +Inf
+//
+//	NaN.Abs() = NaN
+//	±Inf.Abs() = +Inf
 func (x Float16WithRound[RND]) Abs() Float16WithRound[RND] {
 	return Float16WithRound[RND]{abs[binary16](x.bits)}
 }
@@ -172,8 +173,9 @@ func (x Float16WithRound[RND]) Abs() Float16WithRound[RND] {
 // Neg returns the negative value of x.
 //
 // Special cases are:
-//   NaN.Neg() = NaN
-//   ±Inf.Neg() = ∓Inf
+//
+//	NaN.Neg() = NaN
+//	±Inf.Neg() = ∓Inf
 func (x Float16WithRound[RND]) Neg() Float16WithRound[RND] {
 	return Float16WithRound[RND]{neg[binary16](x.bits)}
 }
@@ -186,9 +188,10 @@ func (x Float16WithRound[RND]) CopySign(sign Float16WithRound[RND]) Float16WithR
 // NextUp returns the smallest IEEE 754 floating-point value that is greater than the number.
 //
 // Special cases are:
-//   NaN.NextUp() = NaN
-//   +Inf.NextUp() = +Inf
-//   -Inf.NextUp() = -MaxFloat
+//
+//	NaN.NextUp() = NaN
+//	+Inf.NextUp() = +Inf
+//	-Inf.NextUp() = -MaxFloat
 func (x Float16WithRound[RND]) NextUp() Float16WithRound[RND] {
 	return Float16WithRound[RND]{nextUp[binary16](x.bits)}
 }
@@ -196,9 +199,10 @@ func (x Float16WithRound[RND]) NextUp() Float16WithRound[RND] {
 // NextDown returns the largest IEEE 754 floating-point value that is less than the number.
 //
 // Special cases are:
-//   NaN.NextDown() = NaN
-//   +Inf.NextDown() = MaxFloat
-//   -Inf.NextDown() = -Inf
+//
+//	NaN.NextDown() = NaN
+//	+Inf.NextDown() = MaxFloat
+//	-Inf.NextDown() = -Inf
 func (x Float16WithRound[RND]) NextDown() Float16WithRound[RND] {
 	return Float16WithRound[RND]{nextDown[binary16](x.bits)}
 }
@@ -206,10 +210,11 @@ func (x Float16WithRound[RND]) NextDown() Float16WithRound[RND] {
 // Add returns the sum of x+y.
 //
 // Special cases are:
-//   x + NaN = NaN + y = NaN
-//   ±Inf + ∓Inf = NaN
-//   ±Inf + ±Inf = ±Inf
-//   ±Inf + y = x + ±Inf = ±Inf
+//
+//	x + NaN = NaN + y = NaN
+//	±Inf + ∓Inf = NaN
+//	±Inf + ±Inf = ±Inf
+//	±Inf + y = x + ±Inf = ±Inf
 func (x Float16WithRound[RND]) Add(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -219,11 +224,12 @@ func (x Float16WithRound[RND]) Add(y Float16WithRound[RND]) Float16WithRound[RND
 // Sub returns the difference of x-y.
 //
 // Special cases are:
-//   x - NaN = NaN - y = NaN
-//   ±Inf - ±Inf = NaN
-//   ±Inf - ∓Inf = ±Inf
-//   ±Inf - y = ±Inf
-//   x - ±Inf = ∓Inf
+//
+//	x - NaN = NaN - y = NaN
+//	±Inf - ±Inf = NaN
+//	±Inf - ∓Inf = ±Inf
+//	±Inf - y = ±Inf
+//	x - ±Inf = ∓Inf
 func (x Float16WithRound[RND]) Sub(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -233,10 +239,11 @@ func (x Float16WithRound[RND]) Sub(y Float16WithRound[RND]) Float16WithRound[RND
 // Dim returns the maximum of x-y or 0.
 //
 // Special cases are:
-//    x.Dim(NaN) = NaN.Dim(y) = NaN
-//    ±Inf.Dim(±Inf) = NaN
-//    +Inf.Dim(-Inf) = +Inf
-//    -Inf.Dim(+Inf) = 0
+//
+//	x.Dim(NaN) = NaN.Dim(y) = NaN
+//	±Inf.Dim(±Inf) = NaN
+//	+Inf.Dim(-Inf) = +Inf
+//	-Inf.Dim(+Inf) = 0
 func (x Float16WithRound[RND]) Dim(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -246,10 +253,11 @@ func (x Float16WithRound[RND]) Dim(y Float16WithRound[RND]) Float16WithRound[RND
 // Mul returns the product of x*y.
 //
 // Special cases are:
-//   x * NaN = NaN * y = NaN
-//   Inf * 0 = 0 * Inf = NaN
-//   ±x * ±Inf = ±Inf * ±y = +Inf
-//   ±x * ∓Inf = ±Inf * ∓y = -Inf
+//
+//	x * NaN = NaN * y = NaN
+//	Inf * 0 = 0 * Inf = NaN
+//	±x * ±Inf = ±Inf * ±y = +Inf
+//	±x * ∓Inf = ±Inf * ∓y = -Inf
 func (x Float16WithRound[RND]) Mul(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -259,13 +267,14 @@ func (x Float16WithRound[RND]) Mul(y Float16WithRound[RND]) Float16WithRound[RND
 // Div returns the quotient of x/y.
 //
 // Special cases are:
-//   x / NaN = NaN / y = NaN
-//   Inf / Inf = NaN
-//   0 / 0 = NaN
-//   ±x / ±0 = ±Inf / ±y = +Inf
-//   ±x / ∓0 = ±Inf / ∓y = -Inf
-//   ±x / ±Inf = +0
-//   ±x / ∓Inf = -0
+//
+//	x / NaN = NaN / y = NaN
+//	Inf / Inf = NaN
+//	0 / 0 = NaN
+//	±x / ±0 = ±Inf / ±y = +Inf
+//	±x / ∓0 = ±Inf / ∓y = -Inf
+//	±x / ±Inf = +0
+//	±x / ∓Inf = -0
 func (x Float16WithRound[RND]) Div(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -276,10 +285,11 @@ func (x Float16WithRound[RND]) Div(y Float16WithRound[RND]) Float16WithRound[RND
 // The magnitude of the result is less than y, and its sign agrees with that of x.
 //
 // Special cases are:
-//   x.Mod(NaN) = NaN.Mod(y) = NaN
-//   ±Inf.Mod(y) = NaN
-//   x.Mod(±Inf) = x
-//   x.Mod(0) = NaN
+//
+//	x.Mod(NaN) = NaN.Mod(y) = NaN
+//	±Inf.Mod(y) = NaN
+//	x.Mod(±Inf) = x
+//	x.Mod(0) = NaN
 func (x Float16WithRound[RND]) Mod(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -290,8 +300,9 @@ func (x Float16WithRound[RND]) Mod(y Float16WithRound[RND]) Float16WithRound[RND
 // Both values have the same sign as x.
 //
 // Special cases are:
-//   NaN.Modf() = NaN, NaN
-//   ±Inf.Modf() = ±Inf, NaN
+//
+//	NaN.Modf() = NaN, NaN
+//	±Inf.Modf() = ±Inf, NaN
 func (x Float16WithRound[RND]) ModF() (i, f Float16WithRound[RND]) {
 	q, r := modf[binary16](x.bits)
 	return Float16WithRound[RND]{q}, Float16WithRound[RND]{r}
@@ -300,17 +311,19 @@ func (x Float16WithRound[RND]) ModF() (i, f Float16WithRound[RND]) {
 // Less returns true if x < y.
 //
 // Special cases are:
-//   NaN.Less(NaN) == false
-//   NaN.Less(y) == true
-//   x.Less(NaN) = false
+//
+//	NaN.Less(NaN) == false
+//	NaN.Less(y) == true
+//	x.Less(NaN) = false
 func (x Float16WithRound[RND]) Less(y Float16WithRound[RND]) bool {
 	return less[binary16](x.bits, y.bits)
 }
 
 // Compare returns
-//   -1 if x is less than y,
-//    0 if x equals y,
-//   +1 if x is greater than y.
+//
+//	-1 if x is less than y,
+//	 0 if x equals y,
+//	+1 if x is greater than y.
 //
 // A NaN is considered less than any non-NaN,
 // a NaN is considered equal to a NaN,
@@ -322,18 +335,20 @@ func (x Float16WithRound[RND]) Compare(y Float16WithRound[RND]) int {
 // Equal returns true if x == y.
 //
 // Special cases are:
-//   x.Equal(NaN) = NaN.Equal(y) = false
-//   0.Equal(0) = true
+//
+//	x.Equal(NaN) = NaN.Equal(y) = false
+//	0.Equal(0) = true
 func (x Float16WithRound[RND]) Equal(y Float16WithRound[RND]) bool {
 	order, ordered := fcmp[binary16](x.bits, y.bits)
 	return order == 0 && ordered
 }
 
 // Cmp returns
-//    0, false if either x or y is NaN,
-//   -1, true if x is less than y,
-//    0, true if x equals y,
-//   +1, true if x is greater than y.
+//
+//	 0, false if either x or y is NaN,
+//	-1, true if x is less than y,
+//	 0, true if x equals y,
+//	+1, true if x is greater than y.
 func (x Float16WithRound[RND]) Cmp(y Float16WithRound[RND]) (order int, ordered bool) {
 	return fcmp[binary16](x.bits, y.bits)
 }
@@ -341,9 +356,10 @@ func (x Float16WithRound[RND]) Cmp(y Float16WithRound[RND]) (order int, ordered 
 // Min returns the smaller of x or y.
 //
 // Special cases are:
-//   x.Min(NaN) = NaN.Min(x) = x
-//   x.Min(-Inf) = -Inf.Min(x) = -Inf
-//   -0.Min(±0) = ±0.Min(-0) = -0
+//
+//	x.Min(NaN) = NaN.Min(x) = x
+//	x.Min(-Inf) = -Inf.Min(x) = -Inf
+//	-0.Min(±0) = ±0.Min(-0) = -0
 //
 // This differs from math.Min in that it returns the number rather than the NaN, if one of them is NaN.
 // The IEEE 754 standard says it should return the canonical number.
@@ -354,10 +370,11 @@ func (x Float16WithRound[RND]) Min(y Float16WithRound[RND]) Float16WithRound[RND
 // Max returns the larger of x or y.
 //
 // Special cases are:
-//   x.Max(NaN) = NaN.Max(x) = x
-//   x.Max(+Inf) = +Inf.Max(x) = +Inf
-//   +0.Max(±0) = ±0.Max(+0) = +0
-//   -0.Max(-0) = -0
+//
+//	x.Max(NaN) = NaN.Max(x) = x
+//	x.Max(+Inf) = +Inf.Max(x) = +Inf
+//	+0.Max(±0) = ±0.Max(+0) = +0
+//	-0.Max(-0) = -0
 //
 // This differs from math.Max in that it returns the number rather than the NaN, if one of them is NaN.
 // The IEEE 754 standard says it should return the canonical number.
@@ -366,10 +383,11 @@ func (x Float16WithRound[RND]) Max(y Float16WithRound[RND]) Float16WithRound[RND
 }
 
 // CmpMag returns
-//    0, false if either x or y is NaN,
-//   -1, true if |x| is less than |y|,
-//    0, true if |x| equals |y|,
-//   +1, true if |x| is greater than |y|.
+//
+//	 0, false if either x or y is NaN,
+//	-1, true if |x| is less than |y|,
+//	 0, true if |x| equals |y|,
+//	+1, true if |x| is greater than |y|.
 func (x Float16WithRound[RND]) CmpMag(y Float16WithRound[RND]) (order int, ordered bool) {
 	return fcmpMag[binary16](x.bits, y.bits)
 }
@@ -377,10 +395,11 @@ func (x Float16WithRound[RND]) CmpMag(y Float16WithRound[RND]) (order int, order
 // MinMag returns the smaller of magnitude of x or y.
 //
 // Special cases are:
-//   x.MinMag(NaN) = NaN.MinMag(x) = x
-//   x.MinMag(±Inf) = ±Inf.MinMag(x) = ±Inf
-//   ±Inf.MinMag(±Inf) = ±Inf.MinMag(∓Inf) = ±Inf
-//   ±0.MinMag(±0) = ±0.MinMag(∓0) = ±0
+//
+//	x.MinMag(NaN) = NaN.MinMag(x) = x
+//	x.MinMag(±Inf) = ±Inf.MinMag(x) = ±Inf
+//	±Inf.MinMag(±Inf) = ±Inf.MinMag(∓Inf) = ±Inf
+//	±0.MinMag(±0) = ±0.MinMag(∓0) = ±0
 func (x Float16WithRound[RND]) MinMag(y Float16WithRound[RND]) Float16WithRound[RND] {
 	return Float16WithRound[RND]{fminMag[binary16](x.bits, y.bits)}
 }
@@ -388,10 +407,11 @@ func (x Float16WithRound[RND]) MinMag(y Float16WithRound[RND]) Float16WithRound[
 // MaxMag returns the larger of magnitude of x or y.
 //
 // Special cases are:
-//   x.MaxMag(NaN) = NaN.MaxMag(x) = x
-//   x.MaxMag(±Inf) = ±Inf.MaxMag(x) = ±Inf
-//   ±Inf.MaxMag(±Inf) = ±Inf.MaxMag(∓Inf) = ±Inf
-//   ±0.MaxMag(±0) = ±0.MaxMag(∓0) = ±0
+//
+//	x.MaxMag(NaN) = NaN.MaxMag(x) = x
+//	x.MaxMag(±Inf) = ±Inf.MaxMag(x) = ±Inf
+//	±Inf.MaxMag(±Inf) = ±Inf.MaxMag(∓Inf) = ±Inf
+//	±0.MaxMag(±0) = ±0.MaxMag(∓0) = ±0
 func (x Float16WithRound[RND]) MaxMag(y Float16WithRound[RND]) Float16WithRound[RND] {
 	return Float16WithRound[RND]{fmaxMag[binary16](x.bits, y.bits)}
 }
@@ -399,9 +419,10 @@ func (x Float16WithRound[RND]) MaxMag(y Float16WithRound[RND]) Float16WithRound[
 // Round returns the nearest integer, rounding ties away from zero.
 //
 // Special cases are:
-//   NaN.Round() = NaN
-//   ±Inf.Round() = ±Inf
-//   ±0.Round() = ±0
+//
+//	NaN.Round() = NaN
+//	±Inf.Round() = ±Inf
+//	±0.Round() = ±0
 func (x Float16WithRound[RND]) Round() Float16WithRound[RND] {
 	return Float16WithRound[RND]{round[binary16](x.bits)}
 }
@@ -409,9 +430,10 @@ func (x Float16WithRound[RND]) Round() Float16WithRound[RND] {
 // Round returns the nearest integer, rounding ties to even.
 //
 // Special cases are:
-//   NaN.RoundToEven() = NaN
-//   ±Inf.RoundToEven() = ±Inf
-//   ±0.RoundToEven() = ±0
+//
+//	NaN.RoundToEven() = NaN
+//	±Inf.RoundToEven() = ±Inf
+//	±0.RoundToEven() = ±0
 func (x Float16WithRound[RND]) RoundToEven() Float16WithRound[RND] {
 	return Float16WithRound[RND]{roundToEven[binary16](x.bits)}
 }
@@ -419,9 +441,10 @@ func (x Float16WithRound[RND]) RoundToEven() Float16WithRound[RND] {
 // Floor returns the greatest integer value less than or equal to x.
 //
 // Special cases are:
-//   NaN.Floor() = NaN
-//   ±Inf.Floor() = ±Inf
-//   ±0.Floor() = ±0
+//
+//	NaN.Floor() = NaN
+//	±Inf.Floor() = ±Inf
+//	±0.Floor() = ±0
 func (x Float16WithRound[RND]) Floor() Float16WithRound[RND] {
 	return Float16WithRound[RND]{floor[binary16](x.bits)}
 }
@@ -429,9 +452,10 @@ func (x Float16WithRound[RND]) Floor() Float16WithRound[RND] {
 // Trunc returns the integer value of x.
 //
 // Special cases are:
-//   NaN.Trunc() = NaN
-//   ±Inf.Trunc() = ±Inf
-//   ±0.Trunc() = ±0
+//
+//	NaN.Trunc() = NaN
+//	±Inf.Trunc() = ±Inf
+//	±0.Trunc() = ±0
 func (x Float16WithRound[RND]) Trunc() Float16WithRound[RND] {
 	return Float16WithRound[RND]{trunc[binary16](x.bits)}
 }
@@ -439,9 +463,10 @@ func (x Float16WithRound[RND]) Trunc() Float16WithRound[RND] {
 // Ceil returns the least integer value greater than or equal to x.
 //
 // Special cases are:
-//   NaN.Ceil() = NaN
-//   ±Inf.Ceil() = ±Inf
-//   ±0.Ceil() = ±0
+//
+//	NaN.Ceil() = NaN
+//	±Inf.Ceil() = ±Inf
+//	±0.Ceil() = ±0
 func (x Float16WithRound[RND]) Ceil() Float16WithRound[RND] {
 	return Float16WithRound[RND]{ceil[binary16](x.bits)}
 }
@@ -449,10 +474,11 @@ func (x Float16WithRound[RND]) Ceil() Float16WithRound[RND] {
 // Sqrt returns the square root of x.
 //
 // Special cases are:
-//   NaN.Sqrt = NaN
-//   +Inf.Sqrt() = +Inf
-//   ±0.Sqrt() = ±0
-//   -x.Sqrt() = NaN
+//
+//	NaN.Sqrt = NaN
+//	+Inf.Sqrt() = +Inf
+//	±0.Sqrt() = ±0
+//	-x.Sqrt() = NaN
 func (x Float16WithRound[RND]) Sqrt() Float16WithRound[RND] {
 	var rnd RND
 
@@ -462,10 +488,11 @@ func (x Float16WithRound[RND]) Sqrt() Float16WithRound[RND] {
 // RSqrt returns the recipricol of the square root of x.
 //
 // Special cases are:
-//   NaN.RSqrt() = NaN
-//   +Inf.RSqrt() = 0
-//   ±0.RSqrt() = ±Inf
-//   -x.RSqrt = NaN
+//
+//	NaN.RSqrt() = NaN
+//	+Inf.RSqrt() = 0
+//	±0.RSqrt() = ±Inf
+//	-x.RSqrt = NaN
 func (x Float16WithRound[RND]) RSqrt() Float16WithRound[RND] {
 	var rnd RND
 
@@ -475,8 +502,9 @@ func (x Float16WithRound[RND]) RSqrt() Float16WithRound[RND] {
 // Hypot returns x.Mul(x).Add(y.Mul(y)).Sqrt(), taking care to avoid unnecessary overflow and underflow.
 //
 // Special cases are:
-//   NaN.Hypot(y) = x.Hypot(NaN) = NaN
-//   ±Inf.Hypot(y) = x.Hypot(±Inf) = +Inf
+//
+//	NaN.Hypot(y) = x.Hypot(NaN) = NaN
+//	±Inf.Hypot(y) = x.Hypot(±Inf) = +Inf
 func (x Float16WithRound[RND]) Hypot(y Float16WithRound[RND]) Float16WithRound[RND] {
 	var rnd RND
 
@@ -486,8 +514,9 @@ func (x Float16WithRound[RND]) Hypot(y Float16WithRound[RND]) Float16WithRound[R
 // Exp returns e**x, the base-e exponential of x.
 //
 // Special cases are:
-//   NaN.Exp() = NaN
-//   +Inf.Exp() = +Inf
+//
+//	NaN.Exp() = NaN
+//	+Inf.Exp() = +Inf
 //
 // Very large values overflow to 0 or +Inf.
 // Very small values underflow to 1.
@@ -509,9 +538,10 @@ func (x Float16WithRound[RND]) Exp2() Float16WithRound[RND] {
 // LogB returns the binary exponent of x.
 //
 // Special cases are:
-//   NaN.LogB() = NaN
-//   ±Inf.LogB() = +Inf
-//   0.LogB() = -Inf
+//
+//	NaN.LogB() = NaN
+//	±Inf.LogB() = +Inf
+//	0.LogB() = -Inf
 func (x Float16WithRound[RND]) LogB() Float16WithRound[RND] {
 	return Float16WithRound[RND]{logb[binary16](x.bits)}
 }
@@ -520,9 +550,10 @@ func (x Float16WithRound[RND]) LogB() Float16WithRound[RND] {
 // or false if the exponent cannot be represented as an int.
 //
 // Special cases are:
-//   NaN.ILogB() = [math.MaxInt], false
-//   ±Inf.ILogB() = [math.MaxInt], false
-//   0.ILogB() = [math.MinInt], false
+//
+//	NaN.ILogB() = [math.MaxInt], false
+//	±Inf.ILogB() = [math.MaxInt], false
+//	0.ILogB() = [math.MinInt], false
 //
 // N.B.: This returns MaxInt32 and MinInt32 regardless of the size of int.
 func (x Float16WithRound[RND]) ILogB() (int, bool) {

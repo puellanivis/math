@@ -516,7 +516,6 @@ func (f binary[SPEC, D]) isNaN() bool {
 
 func (f binary[SPEC, D]) isInf() bool {
 	var spec SPEC
-	var z D
 
 	return f.e == expMax[SPEC]() && spec.IsZero(f.m)
 }
